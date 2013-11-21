@@ -8,20 +8,22 @@ namespace SeasnakeDatabase {
 	public static class SeasnakeStatic {
 		public static byte[] SSDB = new byte[] { 0x53, 0x53, 0x44, 0x42 };
 	}
-	//NOTE: SEASNAKES ARE EXPECTED TO CREATE THEIR OWN STATIC "FROMFILE" METHODS.
 	public interface ISeasnake {
 		byte[] GetBytes ();
 		void Populate(byte[] content);
 		byte SSDBSubformat { get;}
 	}
 
-	public class Seasnake0<T> : List<T>, ISeasnake where T : IDatablock, new() {
+	public class Seasnake0<T> : List<T>, ISeasnake, IDatablock where T : IDatablock, new() {
 		public byte SSDBSubformat { get{return 0x00;} }
+		public BlockSizeType SizeType {get {return BlockSizeType.Variable32;}}
 		public string Description {
 			get {return description;}
 			set {description = value == null ? String.Empty : (value.Length > 255 ? value.Substring(0, 255) : value);}
 		}
-		protected string description;
+		protected string description = String.Empty;
+		public Seasnake0() : base() {
+		}
 		public Seasnake0(string shortdescription) : base() {
 			this.Description = shortdescription;
 		}
@@ -42,7 +44,7 @@ namespace SeasnakeDatabase {
 				BitConverter.GetBytes(Ti.GetStaticSize ()).CopyTo(header, ++index);
 			}
 
-			List<byte[]> bodyblocks = new List<byte[]> (this.Select ((x) => x.GetBlock ()));
+			List<byte[]> bodyblocks = new List<byte[]> (this.Select ((x) => x.GetBytes ()));
 			byte[] body = new byte[header.Length + bodyblocks.Sum((x) => x.Length) + (bodyblocks.Count * (int)Ti.SizeType)];
 			int dataindex = 0;
 			Buffer.BlockCopy (header, 0, body, dataindex, header.Length);
@@ -141,6 +143,10 @@ namespace SeasnakeDatabase {
 				}
 			}
 		}
+
+		public int GetStaticSize() {
+			return 0;
+		}
 	}
 
 	/*
@@ -156,7 +162,7 @@ namespace SeasnakeDatabase {
 	 * R:(1 Byte)						Size Type of a Body Datablock. (See Below)
 	 * C:(Int32, 4 Bytes)				Size of a static Body Datablock. (THIS BLOCK DOES NOT EXIST IF SIZE TYPE IS NOT STATIC)
 	 * 
-	 * //BODY -- Repeats for every Datablock Pair.
+	 * //BODY -- Repeats for every Datablock in series.
 	 * C:(1, 2, 4 Bytes)				Length of this Body Datablock. (THIS BLOCK DOES NOT EXIST IF SIZE TYPE IS STATIC, SIZE IS DETERMINED BY HEADER)
 	 * R:(Var Bytes)					Body Datablock Bytes.
 	 * 

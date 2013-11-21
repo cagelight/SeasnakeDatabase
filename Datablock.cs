@@ -5,7 +5,7 @@ using System.Text;
 namespace SeasnakeDatabase {
 	public interface IDatablock {
 		BlockSizeType SizeType {get;}
-		byte[] GetBlock();
+		byte[] GetBytes ();
 		void Populate(byte[] block);
 		/// <summary>
 		/// Size of the datablock if static. If NOT static, please return 0.
@@ -24,7 +24,7 @@ namespace SeasnakeDatabase {
 		public Int32Datablock(int val) {
 			this.Value = val;
 		}
-		public byte[] GetBlock() {
+		public byte[] GetBytes() {
 			return BitConverter.GetBytes (this.Value);
 		}
 		public void Populate(byte [] block) {
@@ -46,7 +46,7 @@ namespace SeasnakeDatabase {
 		public Int16Datablock(short val) {
 			this.Value = val;
 		}
-		public byte[] GetBlock() {
+		public byte[] GetBytes() {
 			return BitConverter.GetBytes (this.Value);
 		}
 		public void Populate(byte [] block) {
@@ -68,7 +68,7 @@ namespace SeasnakeDatabase {
 		public ByteDatablock(byte val) {
 			this.Value = val;
 		}
-		public byte[] GetBlock() {
+		public byte[] GetBytes() {
 			return new byte[] {Value};
 		}
 		public void Populate(byte [] block) {
@@ -91,7 +91,7 @@ namespace SeasnakeDatabase {
 		public ASCIIShortStringDatablock(string val) {
 			this.Value = val;
 		}
-		public byte[] GetBlock() {
+		public byte[] GetBytes() {
 			return Encoding.ASCII.GetBytes (this.Value);
 		}
 		public void Populate(byte [] block) {
@@ -113,7 +113,7 @@ namespace SeasnakeDatabase {
 		public UTF8StringDatablock(string val) {
 			this.Value = val;
 		}
-		public byte[] GetBlock() {
+		public byte[] GetBytes() {
 			return Encoding.UTF8.GetBytes (this.Value);
 		}
 		public void Populate(byte [] block) {
@@ -152,9 +152,9 @@ namespace SeasnakeDatabase {
 			this.Key = Key;
 			this.Value = Value;
 		}
-		public byte[] GetBlock() {
-			byte[] keybytes = this.Key.GetBlock ();
-			byte[] valuebytes = this.Value.GetBlock ();
+		public byte[] GetBytes() {
+			byte[] keybytes = this.Key.GetBytes ();
+			byte[] valuebytes = this.Value.GetBytes ();
 			int sizehead = Math.Min ((int) Key.SizeType, (int)Value.SizeType);
 			byte[] content = new byte[keybytes.Length + valuebytes.Length + sizehead];
 			if (sizehead > 0) {
